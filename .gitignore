@@ -31,3 +31,6 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### EC2 instance private key ###
+*.pem
