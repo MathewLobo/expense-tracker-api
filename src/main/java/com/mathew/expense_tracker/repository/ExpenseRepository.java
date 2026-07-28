@@ -14,4 +14,10 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
 
     @Query("SELECT FUNCTION('TO_CHAR', e.date, 'YYYY-MM') as month, SUM(e.amount) as total FROM Expense e WHERE e.user.id = :userId GROUP BY FUNCTION('TO_CHAR', e.date, 'YYYY-MM') ORDER BY month")
     List<Object[]> findMonthlySpendingByUserId(@Param("userId") Long userId);
+
+    @Query("SELECT e.category, SUM(e.amount) FROM Expense e WHERE e.user.id = :userId AND FUNCTION('TO_CHAR', e.date, 'YYYY-MM') = :month GROUP BY e.category")
+    List<Object[]> findCategorySpendingByUserIdAndMonth(@Param("userId") Long userId, @Param("month") String month);
+
+    @Query("SELECT FUNCTION('TO_CHAR', e.date, 'YYYY-MM') as month, e.category, SUM(e.amount) as total FROM Expense e WHERE e.user.id = :userId AND FUNCTION('TO_CHAR', e.date, 'YYYY') = :year GROUP BY FUNCTION('TO_CHAR', e.date, 'YYYY-MM'), e.category ORDER BY month")
+    List<Object[]> findMonthlyCategorySpendingByYear(@Param("userId") Long userId, @Param("year") String year);
 }

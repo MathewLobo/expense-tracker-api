@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @RestController
 @RequestMapping("/api/expenses")
@@ -41,5 +42,24 @@ public class ExpenseController {
     public ResponseEntity<Void> deleteExpense(@PathVariable Long id) {
         expenseService.deleteExpense(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/user/{userId}/monthly")
+    public ResponseEntity<List<Map<String, Object>>> getMonthlySpending(@PathVariable Long userId) {
+        return ResponseEntity.ok(expenseService.getMonthlySpendin(userId));
+    }
+
+    @GetMapping("/user/{userId}/monthly-category")
+    public ResponseEntity<Map<String, Object>> getMonthlyCategorySpending(
+            @PathVariable Long userId,
+            @RequestParam String month) {
+        return ResponseEntity.ok(expenseService.getMonthlyCategorySpending(userId, month));
+    }
+
+    @GetMapping("/user/{userId}/monthly-stacked")
+    public ResponseEntity<List<Map<String, Object>>> getMonthlySpendingByCategory(
+            @PathVariable Long userId,
+            @RequestParam String year) {
+        return ResponseEntity.ok(expenseService.getMonthlySpendingByCategory(userId, year));
     }
 }

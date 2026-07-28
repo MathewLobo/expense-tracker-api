@@ -11,6 +11,11 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+
 @Service
 @RequiredArgsConstructor
 public class ExpenseService {
@@ -49,5 +54,49 @@ public class ExpenseService {
                         Expense::getCategory,
                         Collectors.reducing(BigDecimal.ZERO, Expense::getAmount, BigDecimal::add)
                 ));
+    }
+
+    public List<Map<String, Object>> getMonthlySpendin(Long userId) {
+        List<Object[]> results = expenseRepository.findMonthlySpendingByUserId(userId);
+        List<Map<String, Object>> monthly = new ArrayList<>();
+        for (Object[] row : results) {
+            Map<String, Object> entry = new HashMap<>();
+            entry.put("month", row[0]);
+            entry.put("total", row[1]);
+            monthly.add(entry);
+        }
+        return monthly;
+    }
+
+    public Map<String, Object> getMonthlyCategorySpending(Long userId, String month) {
+        List<Object[]> results = expenseRepository.findCategorySpendingByUserIdAndMonth(userId, month);
+        Map<String, Object> categoryMap = new HashMap<>();
+        for (Object[] row : results) {
+            categoryMap.put((String) row[0], row[1]);
+        }
+        return categoryMap;
+    }
+
+    public List<Map<String, Object>> getMonthlySpendingByCategory(Long userId, String year) {
+        List<Object[]> results = expenseRepository.findMonthlyCategorySpendingByYear(userId, year);
+        
+        String[] months = {"01","02","03","04","05","06","07","08","09","10","11","12"};
+        Map<String, Map<String, Object>> monthMap = new LinkedHashMap<>();
+        for (String m : months) {
+            Map<String, Object> entry = new HashMap<>();
+            entry.put("month", year + "-" + m);
+            monthMap.put(year + "-" + m, entry);
+        }
+        
+        for (Object[] row : results) {
+            String month = (String) row[0];
+            String category = (String) row[1];
+            Object amount = row[2];
+            if (monthMap.containsKey(month)) {
+                monthMap.get(month).put(category, amount);
+            }
+        }
+        
+        return new ArrayList<>(monthMap.values());
     }
 }
